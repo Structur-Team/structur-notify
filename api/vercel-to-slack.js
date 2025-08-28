@@ -8,10 +8,34 @@ export default async function handler(req, res) {
     const slackWebhook = process.env.SLACK_WEBHOOK_URL; // config at Vercel
     const body = req.body;
 
-    const { name, url, state } = body || {};
+    const { deployment } = body.payload || {};
+    if (!deployment) {
+      console.error("No deployment data:", body);
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+    
+    const {
+      name,
+      url,
+      state,
+      meta: { githubCommitAuthorName, githubCommitMessage, githubCommitRef, githubCommitSha } = {}
+    } = deployment;
 
+    // Format Slack message
     const message = {
-      text: `🚀 Deployment *${state}* for project *${name}*\n🔗 ${url}`,
+      text: `🚀 Deployment *${state}* for project *${name}*`,
+      attachments: [
+        {
+          color: state === "READY" ? "good" : "danger",
+          fields: [
+            { title: "URL", value: `https://${url}`, short: false },
+            { title: "Branch", value: githubCommitRef || "-", short: true },
+            { title: "Commit", value: githubCommitSha || "-", short: true },
+            { title: "Author", value: githubCommitAuthorName || "-", short: true },
+            { title: "Message", value: githubCommitMessage || "-", short: false }
+          ]
+        }
+      ]
     };
 
     await fetch(slackWebhook, {
