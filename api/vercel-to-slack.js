@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
     // Format Slack message
     const message = {
-      text: `🚀 Deployment *${state}* for project *${name}*`,
+      text: `🚀 Deployment *${state}* for project *${name}* ${body} `,
       attachments: [
         {
           color: state === "READY" ? "good" : "danger",
