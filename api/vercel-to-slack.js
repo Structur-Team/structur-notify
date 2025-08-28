@@ -8,36 +8,50 @@ export default async function handler(req, res) {
     const slackWebhook = process.env.SLACK_WEBHOOK_URL; // config at Vercel
     const body = req.body;
 
-    const { deployment } = body.payload || {};
+    const { type, target, payload } = body;
+    const { deployment, target } = payload;
     if (!deployment) {
       console.error("No deployment data:", body);
       return res.status(400).json({ error: "Invalid payload" });
     }
     
+    if (type === "deployment.ready" || deployment?.state === "READY") {
+      console.log("✅ Deployment success");
+      state === "READY";
+    } else if (type === "deployment.error" || deployment?.state === "ERROR") {
+      console.log("❌ Deployment failed");
+      state === "ERROR";
+    } else {
+      console.log("⚠️ Don't care deployment");
+      state === "";
+    }
+
+    if (!state || state === "") {
+      console.log("Don't care deployment:");
+      res.status(200).json({ message: "Dont care" });
+    }
+    
     const {
       name,
       url,
-      state,
-      meta: { githubCommitAuthorName, githubCommitMessage, githubCommitRef, githubCommitSha } = {}
+      meta: { githubCommitAuthorName, githubCommitMessage, githubCommitRef, githubRepo } = {}
     } = deployment;
-
+    
     // Format Slack message
     const message = {
       text: `🚀 Deployment *${state}* for project *${name}* ${JSON.stringify(body, null, 2)} `,
       attachments: [
-        {
-          color: state === "READY" ? "good" : "danger",
-          fields: [
-            { title: "URL", value: `https://${url}`, short: false },
-            { title: "Branch", value: githubCommitRef || "-", short: true },
-            { title: "Commit", value: githubCommitSha || "-", short: true },
-            { title: "Author", value: githubCommitAuthorName || "-", short: true },
-            { title: "Message", value: githubCommitMessage || "-", short: false }
-          ]
-        }
+    	{
+    	  color: state === "READY" ? "good" : "danger",
+    	  fields: [
+    		{ title: "📦 Repo", value: githubRepo || "-", short: true },
+    		{ title: "🌿 Branch", value: githubCommitRef || "-", short: true },
+    		{ title: "👤 Author", value: githubCommitAuthorName || "-", short: true },
+    		{ title: "💬 Message", value: githubCommitMessage || "-", short: false }
+    	  ]
+    	}
       ]
     };
-
     await fetch(slackWebhook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
