@@ -8,27 +8,28 @@ export default async function handler(req, res) {
     const slackWebhook = process.env.SLACK_WEBHOOK_URL; // config at Vercel
     const body = req.body;
 
-    const { type, target, payload } = body;
+    const { type, payload } = body;
     const { deployment, target } = payload;
     if (!deployment) {
       console.error("No deployment data:", body);
       return res.status(400).json({ error: "Invalid payload" });
     }
     
+    let state = "";
     if (type === "deployment.ready" || deployment?.state === "READY") {
       console.log("✅ Deployment success");
-      state === "READY";
+      state = "READY";
     } else if (type === "deployment.error" || deployment?.state === "ERROR") {
       console.log("❌ Deployment failed");
-      state === "ERROR";
+      state = "ERROR";
     } else {
       console.log("⚠️ Don't care deployment");
-      state === "";
+      state = "";
     }
 
     if (!state || state === "") {
       console.log("Don't care deployment:");
-      res.status(200).json({ message: "Dont care" });
+      return res.status(200).json({ message: "Dont care" });
     }
     
     const {
@@ -39,7 +40,7 @@ export default async function handler(req, res) {
     
     // Format Slack message
     const message = {
-      text: `🚀 Deployment *${state}* for project *${name}* `,
+      text: `🚀 Deployment *${state}* for project *${name}* at *${target}*`,
       attachments: [
     	{
     	  color: state === "READY" ? "good" : "danger",
