@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     }
     
     let state = "";
-    if (type === "deployment.ready" || deployment?.state === "READY") {
+    if (type === "deployment.ready" || type === "deployment.succeeded" || deployment?.state === "READY") {
       console.log("✅ Deployment success");
       state = "READY";
     } else if (type === "deployment.error" || deployment?.state === "ERROR") {
