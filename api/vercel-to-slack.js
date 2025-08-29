@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     let state = "";
     if (type === "deployment.ready" || type === "deployment.succeeded" || deployment?.state === "READY") {
       console.log("✅ Deployment success");
-      state = "READY";
+      state = "SUCCEEDED";
     } else if (type === "deployment.error" || deployment?.state === "ERROR") {
       console.log("❌ Deployment failed");
       state = "ERROR";
@@ -37,10 +37,11 @@ export default async function handler(req, res) {
       url,
       meta: { githubCommitAuthorName, githubCommitMessage, githubCommitRef, githubRepo } = {}
     } = deployment;
+    const targetEnv = target || "dev";
     
     // Format Slack message
     const message = {
-      text: `🚀 Deployment *${state}* for project *${name}* at *${target}*`,
+      text: `🚀 Deployment *${state}* for project *${name}* at *${targetEnv}*`,
       attachments: [
     	{
     	  color: state === "READY" ? "good" : "danger",
