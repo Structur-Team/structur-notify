@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       text: `🚀 Deployment *${state}* for project *${name}* at *${targetEnv}*`,
       attachments: [
     	{
-    	  color: state === "READY" ? "good" : "danger",
+    	  color: state === "SUCCEEDED" ? "good" : "danger",
     	  fields: [
     		{ title: "📦 Repo", value: githubRepo || "-", short: true },
     		{ title: "🌿 Branch", value: githubCommitRef || "-", short: true },
