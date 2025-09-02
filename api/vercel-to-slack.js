@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
     if (!state || state === "") {
       console.log("Don't care deployment:");
-      return res.status(200).json({ message: "Dont care" });
+      return res.status(200).json({ message: "Dont care (state not matched)" });
     }
     
     const {
@@ -38,6 +38,11 @@ export default async function handler(req, res) {
       meta: { githubCommitAuthorName, githubCommitMessage, githubCommitRef, githubRepo } = {}
     } = deployment;
     const targetEnv = target || "dev";
+    
+    if (!["develop", "uat", "production"].includes(githubCommitRef)) {
+      console.log(`Skip notification for branch: ${githubCommitRef}`);
+      return res.status(200).json({ message: `Skip branch ${githubCommitRef}` });
+    }
     
     // Format Slack message
     const message = {
